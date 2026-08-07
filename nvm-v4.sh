@@ -1,27 +1,120 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-_0x01() { printf '%b' "$(echo "$1" | base64 -d 2>/dev/null)"; }
-_0x02() { eval "$(_0x01 "$1")"; }
-_0x03() { echo "$(_0x01 "$1")"; }
+# =========================================================
+# COLORS
+# =========================================================
+RED="\e[1;31m"
+GREEN="\e[1;32m"
+YELLOW="\e[1;33m"
+CYAN="\e[1;36m"
+MAGENTA="\e[1;35m"
+NC="\e[0m"
 
-_CMD_ROOT="_0x02 'aWYgW1sgIiRFVUlEIiAtbmUgMCBdXTsgdGhlbgogICAgXzB4MDQgIkVycm9yOiBQbGVhc2UgcnVuIHRoaXMgaW5zdGFsbGVyIGFzIHJvb3QuIgogICAgZXhpdCAxCmZpCg=='"
-_CMD_OS="_0x02 'aWYgW1sgLWYgL2V0Yy9vcy1yZWxlYXNlIF1dOyB0aGVuCiAgICBzb3VyY2UgL2V0Yy9vcy1yZWxlYXNlCiAgICBESVNUTz0kSURCiAgICBWRVJTSU9OPSRWRVJTSU9OX0lECmVsc2UKICAgIF8weDA0ICJVbmFibGUgdG8gZGV0ZWN0IG9wZXJhdGluZyBzeXN0ZW0uIgogICAgZXhpdCAxCmZpCkFSQ0g9JCh1bmFtZSAtbSkKXzB4MDQgIkRldGVjdGVkIE9TOiAke1BSRVRUWV9OQU1FfSIKXzB4MDQgIkFyY2hpdGVjdHVyZTogJEFSQ0giCg=='"
-_CMD_DEPS="_0x02 'XzB4MDQgIkluc3RhbGxpbmcgZGVwZW5kZW5jaWVzLi4uIgppZiBjb21tYW5kIC12IGFwdCA+IC9kZXYvbnVsbCAyPiYxOyB0aGVuCiAgICBleHBvcnQgREVCSUFOX0ZST05URU5EPW5vbmludGVyYWN0aXZlCiAgICBhcHQgdXBkYXRlIC15CiAgICBhcHQgaW5zdGFsbCAteSBjdXJsIHdnZXQgbHNvZiB0YXIgdW56aXAgc3VkbyBuYW5vIFweyBweXRob24zIHB5dGhvbjMtcGlwIGNhLWNlcnRpZmljYXRlcwplbGlmIGNvbW1hbmQgLXYgZG5mID4gL2Rldi9udWxsIDI+JjE7IHRoZW4KICAgIGRuZiBpbnN0YWxsIC15IGN1cmwgd2dldCBsc29mIHRhciB1bnppcCBzdWRvIG5hbm8gXFwgcHl0aG9uMyBweXRob24zLXBpcCBjYS1jZXJ0aWZpY2F0ZXMKZWxpZiBjb21tYW5kIC12IHl1bSA+IC9kZXYvbnVsbCAyPiYxOyB0aGVuCiAgICB5dW0gaW5zdGFsbCAteSBlcGVsLXJlbGVhc2UKICAgIHl1bSBpbnN0YWxsIC15IGN1cmwgd2dldCBsc29mIHRhciB1bnppcCBzdWRvIG5hbm8gXFwgcHl0aG9uMyBweXRob24zLXBpcCBjYS1jZXJ0aWZpY2F0ZXMKZWxpZiBjb21tYW5kIC12IHBhY21hbiA+IC9kZXYvbnVsbCAyPiYxOyB0aGVuCiAgICBwYWNtYW4gLVN5IC0tbm9jb25maXJtIGN1cmwgd2dldCBsc29mIHRhciB1bnppcCBzdWRvIG5hbm8gXFwgcHl0aG9uIHB5dGhvbi1waXAgY2EtY2VydGlmaWNhdGVzCmVsaWYgY29tbWFuZCAtdiBhcGsgPiAvZGV2L251bGwgMj4mMTsgdGhlbgogICAgYXBrIHVwZGF0ZQogICAgYXBrIGFkZCBjdXJsIHdnZXQgbHNvZiB0YXIgdW56aXAgc3VkbyBuYW5vIFxcIHB5dGhvbjMgcHkzLXBpcCBjYS1jZXJ0aWZpY2F0ZXMKZWxpZiBjb21tYW5kIC12IHp5cHBlciA+IC9kZXYvbnVsbCAyPiYxOyB0aGVuCiAgICB6eXBwZXIgcmVmcmVzaAogICAgenlwcGVyIGluc3RhbGwgLXkgY3VybCB3Z2V0IGxzb2YgdGFyIHVuemlwIHN1ZG8gbmFubyBcXCBweXRob24zIHB5dGhvbjMtcGlwIGNhLWNlcnRpZmljYXRlcwplbHNlCiAgICBfMHgwNCAiVW5zdXBwb3J0ZWQgTGludXggZGlzdHJpYnV0aW9uLiIKICAgIGV4aXQgMQpmaQpfMHgwNCAiRGVwZW5kZW5jaWVzIGluc3RhbGxlZC4iCg=='"
-_CMD_PORT="_0x02 'aWYgbHNvZiAtUGkgOiR7UEFORUxfUE9SVH0gLXNUQ1A6TElTVEVOIC10ID4vZGV2L251bGwgMj4mMTsgdGhlbgogICAgXzB4MDQgIldhcm5pbmc6IFBvcnQgJHtQQU5FTF9QT1JUfSBpcyBhbHJlYWR5IGluIHVzZS4iCiAgICBlY2hvCiAgICBsc29mIC1pOiR7UEFORUxfUE9SVH0KICAgIGVjaG8KICAgIHJlYWQgLXJwICJDb250aW51ZSBhbnl3YXk/ICh5L24pOiAiIGNvbmZpcm0KICAgIGlmIFtbICIkY29uZmlybSIgIT0gInkiIF1dOyB0aGVuCiAgICAgICAgXzB4MDQgIkluc3RhbGxhdGlvbiBjYW5jZWxsZWQuIgogICAgICAgIGV4aXQgMQogICAgZmkKZmkK'"
-_CMD_DIR="_0x02 'XzB4MDQgIkNyZWF0aW5nIGluc3RhbGxhdGlvbiBkaXJlY3RvcnkuLi4iCm1rZGlyIC1wICIke0lOU1RBTExfRElSfSIKY2QgIiR7SU5TVEFMTF9ESVJ9IgpfMHgwNCAiRGlyZWN0b3J5IGNyZWF0ZWQuIgo='"
-_CMD_DOWNLOAD="_0x02 'XzB4MDQgIkRvd25sb2FkaW5nIG52bS5iaW4uLi4iCnJtIC1mIG52bS5iaW4KY3VybCAtTCAtLWZhaWwgLS1yZXRyeSA1IC0tcmV0cnktZGVsYXkgMyAtLXByb2dyZXNzLWJhciAtbyBudm0uYmluICIke05WTV9VUkx9IgplY2hvCg=='"
-_CMD_VERIFY="_0x02 'aWYgW1sgISAtZiBudm0uYmluIF1dOyB0aGVuCiAgICBfMHgwNCAiRG93bmxvYWQgZmFpbGVkLiIKICAgIGV4aXQgMQpmaQppZiBbWyAhIC1zIG52bS5iaW4gXV07IHRoZW4KICAgIF8weDA0ICJEb3dubG9hZGVkIGZpbGUgaXMgZW1wdHkuIgogICAgZXhpdCAxCmZpCkZJTEVfU0laRV9NQj0kKGR1IC1tIG52bS5iaW4gfCBjdXQgLWYxKQpfMHgwNCAiRG93bmxvYWRlZCBGaWxlIFNpemU6ICR7RklMRV9TSVpFX01CfU1CIgppZiBbWyAiJHtGSUxFX1NJWkVfTUJ9IiAtbHQgIiR7TUlOX0ZJTEVfU0laRV9NQn0iIF1dOyB0aGVuCiAgICBfMHgwNCAiSW52YWxpZCBvciBjb3JydXB0ZWQgbnZtLmJpbiBkZXRlY3RlZC4iCiAgICBmaWxlIG52bS5iaW4gfHwgdHJ1ZQogICAgZXhpdCAxCmZpCmlmIGZpbGUgbnZtLmJpbiB8IGdyZXAgLXFpICJodG1sIjsgdGhlbgogICAgXzB4MDQgIkRvd25sb2FkZWQgSFRNTCBwYWdlIGluc3RlYWQgb2YgYmluYXJ5LiIKICAgIGV4aXQgMQpmaQpjaG1vZCAreCBudm0uYmluCl8weDA0ICJudm0uYmluIHZlcmlmaWVkIHN1Y2Nlc3NmdWxseS4iCg=='"
-_CMD_FW="_0x02 'XzB4MDQgIkNvbmZpZ3VyaW5nIGZpcmV3YWxsLi4uIgppZiBjb21tYW5kIC12IHVmdyA+IC9kZXYvbnVsbCAyPiYxOyB0aGVuCiAgICB1ZncgYWxsb3cgJHtQQU5FTF9QT1JUfS90Y3AgPi9kZXYvbnVsbCAyPiYxIHx8IHRydWUKZmkKaWYgY29tbWFuZCAtdiBmaXJld2FsbC1jbWQgPiAvZGV2L251bGwgMj4mMTsgdGhlbgogICAgZmlyZXdhbGwtY21kIC0tcGVybWFuZW50IC0tYWRkLXBvcnQ9JHtQQU5FTF9QT1JUfS90Y3AgPi9kZXYvbnVsbCAyPiYxIHx8IHRydWUKICAgIGZpcmV3YWxsLWNtZCAtLXJlbG9hZCA+L2Rldi9udWxsIDI+JjEgfHwgdHJ1ZQpmaQppZiBjb21tYW5kIC12IGlwdGFibGVzID4gL2Rldi9udWxsIDI+JjE7IHRoZW4KICAgIGlwdGFibGVzIC1DIElOUFVUIHAgdGNwIC0tZHBvcnQgJHtQQU5FTF9QT1JUfSAtaiBBQ0NFUFQgPi9kZXYvbnVsbCAyPiYxIHx8IFwKICAgIGlwdGFibGVzIC1JIElOUFVUIHAgdGNwIC0tZHBvcnQgJHtQQU5FTF9QT1JUfSAtaiBBQ0NFUFQgPi9kZXYvbnVsbCAyPiYxIHx8IHRydWUKZmkKXzB4MDQgIkZpcmV3YWxsIGNvbmZpZ3VyZWQuIgo='"
-_CMD_SYSTEMD="_0x02 'aWYgY29tbWFuZCAtdiBzeXN0ZW1jdGwgPiAvZGV2L251bGwgMj4mMTsgdGhlbgogICAgXzB4MDQgIkNyZWF0aW5nIHN5c3RlbWQgc2VydmljZS4uLiIKY2F0ID4gL2V0Yy9zeXN0ZW1kL3N5c3RlbS8ke1NFUlZJQ0VfTkFNRX0uc2VydmljZSA8PCBFT0YKW1VuaXRdCkRlc2NyaXB0aW9uPU5WTSBQYW5lbCBWNApBZnRlcj1uZXR3b3JrLW9ubGluZS50YXJnZXQKV2FudHM9bmV0d29yay1vbmxpbmUudGFyZ2V0CgpbU2VydmljZV0KVHlwZT1zaW1wbGUKV29ya2luZ0RpcmVjdG9yeT0ke0lOU1RBTExfRElSfQpFeGVjU3RhcnQ9JHtCSU5fRklMRX0KUmVzdGFydD1hbHdheXMKUmVzdGFydFNlYz01CkxpbWl0Tk9GSUxFPTEwNDg1NzYKVXNlcj1yb290ClN0YW5kYXJkT3V0cHV0PWFwcGVuZDoke0xPR19GSUxFfQpTdGFuZGFyZEVycm9yPWFwcGVuZDoke0xPR19GSUxFfQoKW0luc3RhbGxdCldhbnRlZEJ5PW11bGktdXNlci50YXJnZXQKRU9GClN5c3RlbWN0bCBkYWVtb24tcmVsb2FkClN5c3RlbWN0bCBlbmFibGUgJHtTRVJWSUNFX05BTUV9ID4vZGV2L251bGwgMj4mMQpTeXN0ZW1jdGwgcmVzdGFydCAke1NFUlZJQ0VfTkFNRX0Kc2xlZXAgNQppZiBzeXN0ZW1jdGwgaXMtYWN0aXZlIC0tcXVpZXQgJHtTRVJWSUNFX05BTUV9OyB0aGVuCiAgICBfMHgwNCAiTlZNIHNlcnZpY2Ugc3RhcnRlZCBzdWNjZXNzZnVsbHkuIgplbHNlCiAgICBfMHgwNCAiTlZNIHNlcnZpY2UgZmFpbGVkIHRvIHN0YXJ0LiIKICAgIGVjaG8KICAgIHN5c3RlbWN0bCBzdGF0dXMgJHtTRVJWSUNFX05BTUV9IC0tbm8tcGFnZXIKICAgIGVjaG8KICAgIGV4aXQgMQpmaQplbHNlCiAgICBfMHgwNCAic3lzdGVtZCBub3QgZGV0ZWN0ZWQuIgogICAgXzB4MDQgIlJ1bm5pbmcgTlZNIG1hbnVhbGx5Li4uIgogICAgbm9odXAgJHtCSU5fRklMRX0gPj4gJHtMT0dfRklMRX0gMj4mMSAmCiAgICBzbGVlcCAzCmZpCg=='"
+line() {
+    echo -e "${MAGENTA}============================================================${NC}"
+}
 
-_0x04() { echo -e "${RED}$1${NC}"; }
-_0x05() { echo -e "${GREEN}$1${NC}"; }
-_0x06() { echo -e "${YELLOW}$1${NC}"; }
-_0x07() { echo -e "${CYAN}$1${NC}"; }
+info() {
+    echo -e "${CYAN}[INFO]${NC} $1"
+}
 
-RED="\e[1;31m"; GREEN="\e[1;32m"; YELLOW="\e[1;33m"; BLUE="\e[1;34m"; CYAN="\e[1;36m"; MAGENTA="\e[1;35m"; WHITE="\e[1;37m"; NC="\e[0m"
+ok() {
+    echo -e "${GREEN}[OK]${NC} $1"
+}
 
+warn() {
+    echo -e "${YELLOW}[WARNING]${NC} $1"
+}
+
+error() {
+    echo -e "${RED}[ERROR]${NC} $1"
+}
+
+# =========================================================
+# ASCII ART – NVM
+# =========================================================
+clear
+echo -e "${CYAN}"
+cat << "EOF"
+
+███╗   ██╗██╗   ██╗███╗   ███╗
+████╗  ██║██║   ██║████╗ ████║
+██╔██╗ ██║██║   ██║██╔████╔██║
+██║╚██╗██║╚██╗ ██╔╝██║╚██╔╝██║
+██║ ╚████║ ╚████╔╝ ██║ ╚═╝ ██║
+╚═╝  ╚═══╝  ╚═══╝  ╚═╝     ╚═╝
+
+        NVM PANEL V4 ULTRA INSTALLER
+
+EOF
+echo -e "${NC}"
+line
+
+# =========================================================
+# ROOT CHECK
+# =========================================================
+if [[ "$EUID" -ne 0 ]]; then
+    error "Please run this installer as root."
+    exit 1
+fi
+
+# =========================================================
+# OS DETECTION
+# =========================================================
+if [[ -f /etc/os-release ]]; then
+    source /etc/os-release
+    DISTRO=$ID
+    VERSION=$VERSION_ID
+else
+    error "Unable to detect operating system."
+    exit 1
+fi
+
+ARCH=$(uname -m)
+info "Detected OS: ${PRETTY_NAME}"
+info "Architecture: ${ARCH}"
+line
+
+# =========================================================
+# INSTALL DEPENDENCIES
+# =========================================================
+info "Installing dependencies..."
+
+if command -v apt >/dev/null 2>&1; then
+    export DEBIAN_FRONTEND=noninteractive
+    apt update -y
+    apt install -y curl wget lsof tar unzip sudo nano python3 python3-pip ca-certificates
+
+elif command -v dnf >/dev/null 2>&1; then
+    dnf install -y curl wget lsof tar unzip sudo nano python3 python3-pip ca-certificates
+
+elif command -v yum >/dev/null 2>&1; then
+    yum install -y epel-release
+    yum install -y curl wget lsof tar unzip sudo nano python3 python3-pip ca-certificates
+
+elif command -v pacman >/dev/null 2>&1; then
+    pacman -Sy --noconfirm curl wget lsof tar unzip sudo nano python python-pip ca-certificates
+
+elif command -v apk >/dev/null 2>&1; then
+    apk update
+    apk add curl wget lsof tar unzip sudo nano python3 py3-pip ca-certificates
+
+elif command -v zypper >/dev/null 2>&1; then
+    zypper refresh
+    zypper install -y curl wget lsof tar unzip sudo nano python3 python3-pip ca-certificates
+
+else
+    error "Unsupported Linux distribution."
+    exit 1
+fi
+
+ok "Dependencies installed."
+line
+
+# =========================================================
+# VARIABLES
+# =========================================================
 NVM_URL="https://github.com/StriderCraft315/Nvm/releases/download/NVM-v4/nvm.bin"
 INSTALL_DIR="/opt/nvm"
 SERVICE_NAME="nvm"
@@ -30,37 +123,155 @@ BIN_FILE="${INSTALL_DIR}/nvm.bin"
 LOG_FILE="/var/log/nvm.log"
 MIN_FILE_SIZE_MB=30
 
-line() { echo -e "${MAGENTA}============================================================${NC}"; }
-
-clear
-_0x07 "$(_0x01 'CgoKCgogICAgICAgICAgICAgICAgICAgIOKUiOKUgeKVoCDilIrilaXilIIgICDilKrilKXilr3ilIIgICDilI3ilJXilL3ilIIgICDilK3ilKUgICDilI3ilI3ilL0KICAgICAgICAgICAgICAgICAgICDilI3ilK3ilIIgIOKUiOKVpeKUgiAgIOKUiOKVpeKUgiDilI3ilI3ilK3ilI3ilI0KICAgICAgICAgICAgICAgICAgICDilI3ilL3ilI3ilI0g4pSI4pWl4pSCICAg4pSI4pWl4pSC4pSM4pSU4pSM4pSC4pSM4pSM4pSC4pSM4pSC4pSM4pSC4pI0CiAgICAgICAgICAgICAgICAgICAg4pSI4pW94pSg4pSM4pSC4pW94pSCICDilI3ilL3ilJ3ilI3ilI3ilL0g4pSI4pW94pSU4pSg4pSA4pSC4pSU4pSA4pSC4pSU4pSA4pSCI4pSC4pSU4pSA4pSCIwogICAgICAgICAgICAgICAgICAgIOKUiOKVpeKVoO-ilK3ilI3ilI3ilK0g4pSg4pSU4pW94pSU4pSA4pSC4p0g4pSI4pW94pSg4pSU4pSA4pSC4p0g4pSI4pW94pSg4pSU4pSA4pSCIwogICAgICAgICAgICAgICAgICAgIOKUrSDilI3ilIIg4pSU4pW94pSC4pSA4pSA4pUg4pSA4pSU4pSA4pUg4pSA4pSU4pSA4pUg4pSA4pSU4pSA4pUKCgogICAgICAgIE5WTSBQQU5FTCBWNCBVTFRSQSBJTlNUQUxMRVIKCg==')"
-echo -e "${NC}"
+# =========================================================
+# PORT CHECK
+# =========================================================
+if lsof -Pi :${PANEL_PORT} -sTCP:LISTEN -t >/dev/null 2>&1; then
+    warn "Port ${PANEL_PORT} is already in use."
+    echo
+    lsof -i:${PANEL_PORT}
+    echo
+    read -rp "Continue anyway? (y/n): " confirm
+    if [[ "$confirm" != "y" ]]; then
+        error "Installation cancelled."
+        exit 1
+    fi
+fi
 line
 
-eval "$_CMD_ROOT"
-eval "$_CMD_OS"
-line
-eval "$_CMD_DEPS"
-line
-eval "$_CMD_PORT"
-line
-eval "$_CMD_DIR"
-line
-eval "$_CMD_DOWNLOAD"
-line
-eval "$_CMD_VERIFY"
-line
-eval "$_CMD_FW"
-line
-eval "$_CMD_SYSTEMD"
+# =========================================================
+# CREATE INSTALL DIRECTORY
+# =========================================================
+info "Creating installation directory..."
+mkdir -p "${INSTALL_DIR}"
+cd "${INSTALL_DIR}"
+ok "Directory created."
 line
 
+# =========================================================
+# DOWNLOAD BINARY
+# =========================================================
+info "Downloading nvm.bin..."
+rm -f nvm.bin
+curl -L --fail --retry 5 --retry-delay 3 --progress-bar -o nvm.bin "${NVM_URL}"
+echo
+line
+
+# =========================================================
+# VERIFY BINARY
+# =========================================================
+if [[ ! -f nvm.bin ]]; then
+    error "Download failed."
+    exit 1
+fi
+
+if [[ ! -s nvm.bin ]]; then
+    error "Downloaded file is empty."
+    exit 1
+fi
+
+FILE_SIZE_MB=$(du -m nvm.bin | cut -f1)
+info "Downloaded File Size: ${FILE_SIZE_MB}MB"
+
+if [[ "${FILE_SIZE_MB}" -lt "${MIN_FILE_SIZE_MB}" ]]; then
+    error "Invalid or corrupted nvm.bin detected."
+    file nvm.bin || true
+    exit 1
+fi
+
+if file nvm.bin | grep -qi "html"; then
+    error "Downloaded HTML page instead of binary."
+    exit 1
+fi
+
+chmod +x nvm.bin
+ok "nvm.bin verified successfully."
+line
+
+# =========================================================
+# FIREWALL CONFIG
+# =========================================================
+info "Configuring firewall..."
+
+if command -v ufw >/dev/null 2>&1; then
+    ufw allow ${PANEL_PORT}/tcp >/dev/null 2>&1 || true
+fi
+
+if command -v firewall-cmd >/dev/null 2>&1; then
+    firewall-cmd --permanent --add-port=${PANEL_PORT}/tcp >/dev/null 2>&1 || true
+    firewall-cmd --reload >/dev/null 2>&1 || true
+fi
+
+if command -v iptables >/dev/null 2>&1; then
+    iptables -C INPUT -p tcp --dport ${PANEL_PORT} -j ACCEPT >/dev/null 2>&1 || \
+    iptables -I INPUT -p tcp --dport ${PANEL_PORT} -j ACCEPT >/dev/null 2>&1 || true
+fi
+
+ok "Firewall configured."
+line
+
+# =========================================================
+# SYSTEMD SERVICE
+# =========================================================
+if command -v systemctl >/dev/null 2>&1; then
+    info "Creating systemd service..."
+
+    cat > /etc/systemd/system/${SERVICE_NAME}.service << EOF
+[Unit]
+Description=NVM Panel V4
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=${INSTALL_DIR}
+ExecStart=${BIN_FILE}
+Restart=always
+RestartSec=5
+LimitNOFILE=1048576
+User=root
+StandardOutput=append:${LOG_FILE}
+StandardError=append:${LOG_FILE}
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    systemctl daemon-reload
+    systemctl enable ${SERVICE_NAME} >/dev/null 2>&1
+    systemctl restart ${SERVICE_NAME}
+
+    sleep 5
+
+    if systemctl is-active --quiet ${SERVICE_NAME}; then
+        ok "NVM service started successfully."
+    else
+        error "NVM service failed to start."
+        echo
+        systemctl status ${SERVICE_NAME} --no-pager
+        echo
+        exit 1
+    fi
+else
+    warn "systemd not detected."
+    warn "Running NVM manually..."
+    nohup ${BIN_FILE} >> ${LOG_FILE} 2>&1 &
+    sleep 3
+fi
+line
+
+# =========================================================
+# PANEL STATUS
+# =========================================================
 if lsof -Pi :${PANEL_PORT} -sTCP:LISTEN -t >/dev/null 2>&1; then
     PANEL_STATUS="${GREEN}ONLINE${NC}"
 else
     PANEL_STATUS="${RED}OFFLINE${NC}"
 fi
 
+# =========================================================
+# PUBLIC IP
+# =========================================================
 PUBLIC_IP=$(curl -4 -s --max-time 10 ifconfig.me || true)
 if [[ -z "${PUBLIC_IP}" ]]; then
     PUBLIC_IP=$(hostname -I | awk '{print $1}')
@@ -69,6 +280,48 @@ if [[ -z "${PUBLIC_IP}" ]]; then
     PUBLIC_IP="YOUR_SERVER_IP"
 fi
 
+# =========================================================
+# FINISH (no one-line installer)
+# =========================================================
 clear
-_0x05 "$(_0x01 'CgriipXilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ0K4pWgICAgICAgICAgICAgICBOVk0gUEFORUwgVjQgSU5TVEFMTEVEICAgICAgICAgICAgICAgIOKVogrilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ0KClNUQVRVUyAgICAgICAgICAgIDogJHtQQU5FTF9TVEFUVVN9CgpQQU5FTCBVUkwgICAgICAgICA6IGh0dHA6Ly8ke1BVQkxJQ19JUH06JHtQQU5FTF9QT1JUfQpVU0VSTkFNTSAgICAgICAgICA6IGFkbWluClBBU1NXT1JEICAgICAgICAgIDogYWRtaW4KCklOU1RBTEwgRElSRUNUT1JZIDogJHtJTlNUQUxMX0RJUn0KQklOQVJZIEZJTEUgICAgICAgOiAke0JJTl9GSUxFfQpMT0cgRklMRSAgICAgICAgICA6ICR7TE9HX0ZJTEV9ClNFUlZJQ0UgTkFNRSAgICAgIDogJHtTRVJWSUNFX05BTUV9CgrilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ0KU0VSVklDRSBDT01NQU5EUwpzeXN0ZW1jdGwgc3RhcnQgJHtTRVJWSUNFX05BTUV9CnN5c3RlbWN0bCBzdG9wICR7U0VSVklDRV9OQU1FfQpzeXN0ZW1jdGwgcmVzdGFydCAke1NFUlZJQ0VfTkFNRX0Kc3lzdGVtY3RsIHN0YXR1cyAke1NFUlZJQ0VfTkFNRX0KCuKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUneKUnUoClZJRVcgTElWRSBMT0dTCmpvdXJuYWxjdGwgLXUgJHtTRVJWSUNFX05BTUV9IC1mCgrilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ3ilJ0K')"
+echo -e "${GREEN}"
+cat << EOF
+
+╔══════════════════════════════════════════════════════╗
+║               NVM PANEL V4 INSTALLED                ║
+╚══════════════════════════════════════════════════════╝
+
+STATUS            : ${PANEL_STATUS}
+
+PANEL URL         : http://${PUBLIC_IP}:${PANEL_PORT}
+
+USERNAME          : admin
+PASSWORD          : admin
+
+INSTALL DIRECTORY : ${INSTALL_DIR}
+
+BINARY FILE       : ${BIN_FILE}
+
+LOG FILE          : ${LOG_FILE}
+
+SERVICE NAME      : ${SERVICE_NAME}
+
+════════════════════════════════════════════════════════
+
+SERVICE COMMANDS
+
+systemctl start ${SERVICE_NAME}
+systemctl stop ${SERVICE_NAME}
+systemctl restart ${SERVICE_NAME}
+systemctl status ${SERVICE_NAME}
+
+════════════════════════════════════════════════════════
+
+VIEW LIVE LOGS
+
+journalctl -u ${SERVICE_NAME} -f
+
+════════════════════════════════════════════════════════
+
+EOF
 echo -e "${NC}"
