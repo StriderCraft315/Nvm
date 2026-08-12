@@ -1,7 +1,7 @@
 # Nvm Panel V4
 
 <p align="center">
-  <img src="https://via.placeholder.com/200x200?text=Nvm+Panel" alt="Nvm Panel Logo" width="200" height="200">
+  <img src="https://i.ibb.co/wZP1sQzG/image.png" alt="Nvm Panel Logo" width="200" height="200">
 </p>
 
 [![Version](https://img.shields.io/badge/version-v4.0-blue)](https://github.com/StriderCraft315/Nvm/releases)
