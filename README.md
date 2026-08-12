@@ -52,7 +52,7 @@ Then open your browser to `http://localhost:5000` (or the IP of your server) and
 
 ## License Activation 
 
-Visit : https://discord.gg/k85XUNb7Z7 And Open A Ticket For A License Key After that Put it into the License Activation Page to Activate It
+Visit : [Flappy Community Discord](https://discord.gg/k85XUNb7Z7) And Open A Ticket For A License Key After that Put it into the License Activation Page to Activate It
 
 
 
