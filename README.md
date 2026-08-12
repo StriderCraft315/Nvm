@@ -75,7 +75,7 @@ This project is licensed under the **MIT License** – see the [LICENSE](LICENSE
 ## Support
 
 - **Issues**: [GitHub Issues](https://github.com/StriderCraft315/Nvm/issues)
-- **Discord**: Open A Ticket In The [`Flappy Community Discord`](https://discord.gg/k85XUNb7Z7) .
+- **Discord**: Open A Ticket In The [Flappy Community Discord](https://discord.gg/k85XUNb7Z7) .
 
 ---
 
