@@ -19,7 +19,7 @@
 - **Fast & Lightweight** – minimal resource usage.
 - **Modern Web Interface** – crafted with HTML & CSS for a clean, responsive dashboard.
 - **One‑Line Install** – get up and running in seconds.
-- **Cross‑Platform** – works on Linux, macOS, and Windows (via WSL).
+- **Cross‑Platform** – works on Linux and Windows (via WSL).
 - **Easy Configuration** – all settings at your fingertips.
 
 ---
